@@ -1,70 +1,22 @@
-import  { useState, useEffect } from 'react';
-import axios from 'axios';
-import io from 'socket.io-client';
-import Login from './Login';
-import Chat from './Chat';
-import { User, Message } from './types';
-
-const API_URL = 'http://localhost:3001';
-const socket = io(API_URL);
+import React from 'react';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import Home from './components/Home';
+import Login from './components/Login';
+import Register from './components/Register';
+import Chat from './components/Chat';
 
 function App() {
-  const [user, setUser] = useState<User | null>(null);
-  const [messages, setMessages] = useState<Message[]>([]);
-
-  useEffect(() => {
-    const token = localStorage.getItem('token');
-    if (token) {
-      fetchMessages(token);
-    }
-
-    socket.on('message', (message: Message) => {
-      setMessages((prevMessages) => [...prevMessages, message]);
-    });
-
-    return () => {
-      socket.off('message');
-    };
-  }, []);
-
-  const fetchMessages = async (token: string) => {
-    try {
-      const response = await axios.get<Message[]>(`${API_URL}/messages`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      setMessages(response.data);
-    } catch (error) {
-      console.error('Error fetching messages:', error);
-    }
-  };
-
-  const handleLogin = async (username: string, password: string) => {
-    try {
-      const response = await axios.post<{ token: string; user: User }>(`${API_URL}/login`, { username, password });
-      const { token, user } = response.data;
-      localStorage.setItem('token', token);
-      setUser(user);
-      fetchMessages(token);
-    } catch (error) {
-      console.error('Login error:', error);
-      alert('Invalid username or password');
-    }
-  };
-
-  const handleSendMessage = (message: string) => {
-    if (user) {
-      socket.emit('sendMessage', { userId: user.id, message });
-    }
-  };
-
   return (
-    <div className="App">
-      {user ? (
-        <Chat messages={messages} onSendMessage={handleSendMessage} />
-      ) : (
-        <Login onLogin={handleLogin} />
-      )}
-    </div>
+    <Router>
+      <div className="App">
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
+          <Route path="/chat" element={<Chat />} />
+        </Routes>
+      </div>
+    </Router>
   );
 }
 
