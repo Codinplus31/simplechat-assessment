@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
 
-const API_URL = 'https://simplechat-backend.vercel.app';
+const API_URL = 'https://simplechat-backend-f4w5.onrender.com';
 
 function Login() {
   const [username, setUsername] = useState('');
