@@ -1,15 +1,16 @@
 import  { useState, useEffect } from 'react';
 import axios from 'axios';
 import io from 'socket.io-client';
-import Login from './Login.tsx';
-import Chat from './Chat.tsx';
+import Login from './components/Login';
+import Chat from './components/Chat';
+import { User, Message } from './types';
 
-const API_URL = 'https://simplechat-backend.vercel.app';
+const API_URL = 'http://localhost:3001';
 const socket = io(API_URL);
 
 function App() {
-  const [user, setUser] = useState(null);
-  const [messages, setMessages] = useState([]);
+  const [user, setUser] = useState<User | null>(null);
+  const [messages, setMessages] = useState<Message[]>([]);
 
   useEffect(() => {
     const token = localStorage.getItem('token');
@@ -17,7 +18,7 @@ function App() {
       fetchMessages(token);
     }
 
-    socket.on('message', (message) => {
+    socket.on('message', (message: Message) => {
       setMessages((prevMessages) => [...prevMessages, message]);
     });
 
@@ -26,9 +27,9 @@ function App() {
     };
   }, []);
 
-  const fetchMessages = async (token) => {
+  const fetchMessages = async (token: string) => {
     try {
-      const response = await axios.get(`${API_URL}/messages`, {
+      const response = await axios.get<Message[]>(`${API_URL}/messages`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       setMessages(response.data);
@@ -37,12 +38,12 @@ function App() {
     }
   };
 
-  const handleLogin = async (username, password) => {
+  const handleLogin = async (username: string, password: string) => {
     try {
-      const response = await axios.post(`${API_URL}/login`, { username, password });
-      const { token } = response.data;
+      const response = await axios.post<{ token: string; user: User }>(`${API_URL}/login`, { username, password });
+      const { token, user } = response.data;
       localStorage.setItem('token', token);
-      setUser({ username });
+      setUser(user);
       fetchMessages(token);
     } catch (error) {
       console.error('Login error:', error);
@@ -50,8 +51,10 @@ function App() {
     }
   };
 
-  const handleSendMessage = (message) => {
-    socket.emit('sendMessage', { userId: user.id, message });
+  const handleSendMessage = (message: string) => {
+    if (user) {
+      socket.emit('sendMessage', { userId: user.id, message });
+    }
   };
 
   return (
@@ -66,3 +69,4 @@ function App() {
 }
 
 export default App;
+
