@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import io from 'socket.io-client';
-import { Message, User } from '../types';
+import { Message, User } from './types';
 import UserList from './UserList';
 
 const API_URL = 'https://simplechat-backend.vercel.app';
