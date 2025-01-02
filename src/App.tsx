@@ -1,9 +1,9 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import Home from './components/Home';
-import Login from './components/Login';
-import Register from './components/Register';
-import Chat from './components/Chat';
+import Home from './Home';
+import Login from './Login';
+import Register from './Register';
+import Chat from './Chat';
 
 function App() {
   return (
