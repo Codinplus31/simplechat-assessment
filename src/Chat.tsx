@@ -5,7 +5,7 @@ import io from 'socket.io-client';
 import { Message, User } from './types';
 import UserList from './UserList';
 
-const API_URL = 'https://simplechat-backend.vercel.app';
+const API_URL = 'https://simplechat-backend-f4w5.onrender.com';
 const socket = io(API_URL);
 
 function Chat() {
