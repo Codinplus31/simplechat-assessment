@@ -85,6 +85,7 @@ function Chat() {
         recipientId: selectedUser.id,
         content: newMessage,
       });
+      alert("work");
       setNewMessage('');
     }
   };
@@ -93,6 +94,7 @@ function Chat() {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
     navigate('/login');
+    
   };
 
   const scrollToBottom = () => {
