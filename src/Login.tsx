@@ -1,10 +1,14 @@
-import  { useState } from 'react';
+import React, { useState } from 'react';
 
-function Login({ onLogin }) {
+interface LoginProps {
+  onLogin: (username: string, password: string) => void;
+}
+
+function Login({ onLogin }: LoginProps) {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
 
-  const handleSubmit = (e) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     onLogin(username, password);
   };
@@ -29,3 +33,4 @@ function Login({ onLogin }) {
 }
 
 export default Login;
+
