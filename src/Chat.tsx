@@ -83,11 +83,11 @@ function Chat() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (newMessage.trim() && user && selectedUser) {
-      alert(`Sending message: ${
+      alert(`Sending message: ${{
         senderId: user.id,
         recipientId: selectedUser.id,
         content: newMessage,
-      }`);
+      }}`);
       socket.emit('sendMessage', {
         senderId: user.id,
         recipientId: selectedUser.id,
