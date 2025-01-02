@@ -1,10 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import  { useState, useEffect } from 'react';
 import axios from 'axios';
 import io from 'socket.io-client';
 import Login from './components/Login';
 import Chat from './components/Chat';
 
-const API_URL = 'http://localhost:3001';
+const API_URL = 'https://simplechat-backend.vercel.app';
 const socket = io(API_URL);
 
 function App() {
