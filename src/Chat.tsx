@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 
 function Chat({ messages, onSendMessage }) {
   const [newMessage, setNewMessage] = useState('');
