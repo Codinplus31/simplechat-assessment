@@ -1,8 +1,8 @@
 import  { useState, useEffect } from 'react';
 import axios from 'axios';
 import io from 'socket.io-client';
-import Login from './components/Login';
-import Chat from './components/Chat';
+import Login from './Login';
+import Chat from './Chat';
 import { User, Message } from './types';
 
 const API_URL = 'http://localhost:3001';
