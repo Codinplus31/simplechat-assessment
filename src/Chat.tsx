@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import  { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import io from 'socket.io-client';
@@ -29,9 +29,12 @@ function Chat() {
     const parsedUser = JSON.parse(storedUser);
     setUser(parsedUser);
     fetchUsers(token);
+    
+    console.log('Joining room:', parsedUser.id);
     socket.emit('join', parsedUser.id);
 
     socket.on('message', (message: Message) => {
+      console.log('Received message:', message);
       if (
         (message.sender_id === parsedUser.id && message.recipient_id === selectedUser?.id) ||
         (message.sender_id === selectedUser?.id && message.recipient_id === parsedUser.id)
@@ -80,12 +83,16 @@ function Chat() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (newMessage.trim() && user && selectedUser) {
+      alert(`Sending message: ${
+        senderId: user.id,
+        recipientId: selectedUser.id,
+        content: newMessage,
+      }`);
       socket.emit('sendMessage', {
         senderId: user.id,
         recipientId: selectedUser.id,
         content: newMessage,
       });
-      alert("work");
       setNewMessage('');
     }
   };
@@ -94,7 +101,6 @@ function Chat() {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
     navigate('/login');
-    
   };
 
   const scrollToBottom = () => {
