@@ -1,8 +1,14 @@
-import { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
+import { Message } from '../types';
 
-function Chat({ messages, onSendMessage }) {
+interface ChatProps {
+  messages: Message[];
+  onSendMessage: (message: string) => void;
+}
+
+function Chat({ messages, onSendMessage }: ChatProps) {
   const [newMessage, setNewMessage] = useState('');
-  const messagesEndRef = useRef(null);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -10,7 +16,7 @@ function Chat({ messages, onSendMessage }) {
 
   useEffect(scrollToBottom, [messages]);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (newMessage.trim()) {
       onSendMessage(newMessage);
@@ -23,7 +29,7 @@ function Chat({ messages, onSendMessage }) {
       <div className="messages">
         {messages.map((msg) => (
           <div key={msg.id}>
-            <strong>{msg.username}: </strong>
+            <strong>{msg.user_id}: </strong>
             {msg.content}
           </div>
         ))}
@@ -43,3 +49,4 @@ function Chat({ messages, onSendMessage }) {
 }
 
 export default Chat;
+
