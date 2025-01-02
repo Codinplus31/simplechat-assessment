@@ -1,35 +1,68 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
+import io from 'socket.io-client';
+import Login from './components/Login';
+import Chat from './components/Chat';
+
+const API_URL = 'http://localhost:3001';
+const socket = io(API_URL);
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [user, setUser] = useState(null);
+  const [messages, setMessages] = useState([]);
+
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    if (token) {
+      fetchMessages(token);
+    }
+
+    socket.on('message', (message) => {
+      setMessages((prevMessages) => [...prevMessages, message]);
+    });
+
+    return () => {
+      socket.off('message');
+    };
+  }, []);
+
+  const fetchMessages = async (token) => {
+    try {
+      const response = await axios.get(`${API_URL}/messages`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setMessages(response.data);
+    } catch (error) {
+      console.error('Error fetching messages:', error);
+    }
+  };
+
+  const handleLogin = async (username, password) => {
+    try {
+      const response = await axios.post(`${API_URL}/login`, { username, password });
+      const { token } = response.data;
+      localStorage.setItem('token', token);
+      setUser({ username });
+      fetchMessages(token);
+    } catch (error) {
+      console.error('Login error:', error);
+      alert('Invalid username or password');
+    }
+  };
+
+  const handleSendMessage = (message) => {
+    socket.emit('sendMessage', { userId: user.id, message });
+  };
 
   return (
-    <>
-      <div>
-        <a href="https://vitejs.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+    <div className="App">
+      {user ? (
+        <Chat messages={messages} onSendMessage={handleSendMessage} />
+      ) : (
+        <Login onLogin={handleLogin} />
+      )}
+    </div>
+  );
 }
 
-export default App
+export default App;
