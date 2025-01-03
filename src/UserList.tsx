@@ -1,14 +1,23 @@
-import  { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { User } from './types';
+import { User } from '../types';
 import { LogOut } from 'lucide-react';
 
-const API_URL = 'https://simplechat-backend.vercel.app';
+const API_URL = 'https://simplechat-backend-f4w5.onrender.com';
+
+const Preloader: React.FC = () => {
+  return (
+    <div className="flex justify-center items-center h-screen bg-gray-100">
+      <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-indigo-500"></div>
+    </div>
+  );
+};
 
 function UserList() {
   const [users, setUsers] = useState<User[]>([]);
   const [currentUser, setCurrentUser] = useState<User | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -30,8 +39,10 @@ function UserList() {
         headers: { Authorization: `Bearer ${token}` },
       });
       setUsers(response.data);
+      setIsLoading(false);
     } catch (error) {
       console.error('Error fetching users:', error);
+      setIsLoading(false);
     }
   };
 
@@ -58,6 +69,10 @@ function UserList() {
     const index = username.charCodeAt(0) % colors.length;
     return colors[index];
   };
+
+  if (isLoading) {
+    return <Preloader />;
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">
