@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { User } from '../types';
+import { User } from './types';
 import { LogOut } from 'lucide-react';
 
 const API_URL = 'https://simplechat-backend-f4w5.onrender.com';
