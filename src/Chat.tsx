@@ -1,43 +1,40 @@
 import  { useState, useEffect, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import axios from 'axios';
 import io from 'socket.io-client';
-import { Message, User } from './types';
-import UserList from './UserList';
+import { Message, User } from '../types';
+import { ArrowLeft, Send } from 'lucide-react';
 
-const API_URL = 'https://simplechat-backend-f4w5.onrender.com';
+const API_URL = 'https://simplechat-backend.vercel.app';
 const socket = io(API_URL);
 
 function Chat() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState('');
   const [user, setUser] = useState<User | null>(null);
-  const [users, setUsers] = useState<User[]>([]);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
+  const { userId } = useParams();
 
   useEffect(() => {
     const token = localStorage.getItem('token');
     const storedUser = localStorage.getItem('user');
 
-    if (!token || !storedUser) {
-      navigate('/login');
+    if (!token || !storedUser || !userId) {
+      navigate('/users');
       return;
     }
 
     const parsedUser = JSON.parse(storedUser);
     setUser(parsedUser);
-    fetchUsers(token);
-    
-    console.log('Joining room:', parsedUser.id);
+    fetchSelectedUser(token, userId);
     socket.emit('join', parsedUser.id);
 
     socket.on('message', (message: Message) => {
-      console.log('Received message:', message);
       if (
-        (message.sender_id === parsedUser.id && message.recipient_id === selectedUser?.id) ||
-        (message.sender_id === selectedUser?.id && message.recipient_id === parsedUser.id)
+        (message.sender_id === parsedUser.id && message.recipient_id === Number(userId)) ||
+        (message.sender_id === Number(userId) && message.recipient_id === parsedUser.id)
       ) {
         setMessages((prevMessages) => [...prevMessages, message]);
       }
@@ -46,27 +43,25 @@ function Chat() {
     return () => {
       socket.off('message');
     };
-  }, [navigate, selectedUser]);
+  }, [navigate, userId]);
 
-  const fetchUsers = async (token: string) => {
+  const fetchSelectedUser = async (token: string, userId: string) => {
     try {
-      const response = await axios.get<User[]>(`${API_URL}/users`, {
+      const response = await axios.get<User>(`${API_URL}/users/${userId}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      setUsers(response.data);
+      setSelectedUser(response.data);
+      fetchMessages(token, userId);
     } catch (error) {
-      console.error('Error fetching users:', error);
+      console.error('Error fetching selected user:', error);
     }
   };
 
-  const fetchMessages = async () => {
-    if (!user || !selectedUser) return;
-
+  const fetchMessages = async (token: string, recipientId: string) => {
     try {
-      const token = localStorage.getItem('token');
       const response = await axios.get<Message[]>(`${API_URL}/messages`, {
         headers: { Authorization: `Bearer ${token}` },
-        params: { recipient_id: selectedUser.id },
+        params: { recipient_id: recipientId },
       });
       setMessages(response.data);
     } catch (error) {
@@ -74,20 +69,9 @@ function Chat() {
     }
   };
 
-  useEffect(() => {
-    if (selectedUser) {
-      fetchMessages();
-    }
-  }, [selectedUser]);
-
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (newMessage.trim() && user && selectedUser) {
-     /* alert(`Sending message: ${JSON.stringify({
-        senderId: user.id,
-        recipientId: selectedUser.id,
-        content: newMessage,
-      })}`);*/
       socket.emit('sendMessage', {
         senderId: user.id,
         recipientId: selectedUser.id,
@@ -97,10 +81,22 @@ function Chat() {
     }
   };
 
-  const handleLogout = () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
-    navigate('/login');
+  const getInitial = (username: string) => {
+    return username.charAt(0).toUpperCase();
+  };
+
+  const getRandomColor = (username: string) => {
+    const colors = [
+      'bg-pink-500',
+      'bg-purple-500',
+      'bg-indigo-500',
+      'bg-blue-500',
+      'bg-green-500',
+      'bg-yellow-500',
+      'bg-red-500',
+    ];
+    const index = username.charCodeAt(0) % colors.length;
+    return colors[index];
   };
 
   const scrollToBottom = () => {
@@ -109,66 +105,75 @@ function Chat() {
 
   useEffect(scrollToBottom, [messages]);
 
+  if (!selectedUser) return null;
+
   return (
-    <div className="flex flex-col h-screen bg-gray-100">
+    <div className="flex flex-col h-screen bg-gray-50">
+      {/* Header */}
       <div className="bg-white shadow">
-        <div className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8 flex justify-between items-center">
-          <h1 className="text-3xl font-bold text-gray-900">Chat App</h1>
-          <button
-            onClick={handleLogout}
-            className="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
-          >
-            Logout
-          </button>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="py-6 flex items-center space-x-4">
+            <button
+              onClick={() => navigate('/users')}
+              className="text-gray-600 hover:text-gray-900"
+            >
+              <ArrowLeft className="h-6 w-6" />
+            </button>
+            <div className={`w-12 h-12 rounded-full ${getRandomColor(selectedUser.username)} flex items-center justify-center text-white text-xl font-semibold`}>
+              {getInitial(selectedUser.username)}
+            </div>
+            <div>
+              <h2 className="text-2xl font-semibold text-gray-900">{selectedUser.username}</h2>
+              <p className="text-sm text-gray-500">Online</p>
+            </div>
+          </div>
         </div>
       </div>
-      <div className="flex-1 flex overflow-hidden">
-        <div className="w-1/4 p-4 overflow-y-auto">
-          <UserList users={users} onSelectUser={setSelectedUser} selectedUser={selectedUser} />
-        </div>
-        <div className="flex-1 flex flex-col p-4">
-          {selectedUser ? (
-            <>
-              <div className="bg-white shadow-md rounded-lg p-4 mb-4">
-                <h2 className="text-xl font-semibold">Chat with {selectedUser.username}</h2>
-              </div>
-              <div className="flex-1 overflow-y-auto space-y-4 mb-4">
-                {messages.map((msg) => (
-                  <div
-                    key={msg.id}
-                    className={`p-3 rounded-lg ${
-                      msg.sender_id === user?.id ? 'bg-indigo-100 ml-auto' : 'bg-white'
-                    }`}
-                    style={{ maxWidth: '70%' }}
-                  >
-                    <p>{msg.content}</p>
-                  </div>
-                ))}
-                <div ref={messagesEndRef} />
-              </div>
-              <form onSubmit={handleSubmit} className="bg-white rounded-lg shadow-md p-4">
-                <div className="flex space-x-2">
-                  <input
-                    type="text"
-                    value={newMessage}
-                    onChange={(e) => setNewMessage(e.target.value)}
-                    placeholder="Type a message..."
-                    className="flex-1 border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                  />
-                  <button
-                    type="submit"
-                    className="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
-                  >
-                    Send
-                  </button>
-                </div>
-              </form>
-            </>
-          ) : (
-            <div className="flex items-center justify-center h-full">
-              <p className="text-xl text-gray-500">Select a user to start chatting</p>
+
+      {/* Messages */}
+      <div className="flex-1 overflow-y-auto px-4 py-6 space-y-4">
+        {messages.map((msg) => (
+          <div
+            key={msg.id}
+            className={`flex ${msg.sender_id === user?.id ? 'justify-end' : 'justify-start'}`}
+          >
+            <div
+              className={`max-w-[70%] rounded-2xl px-4 py-2 ${
+                msg.sender_id === user?.id
+                  ? 'bg-indigo-600 text-white rounded-br-none'
+                  : 'bg-white text-gray-900 rounded-bl-none shadow'
+              }`}
+            >
+              <p>{msg.content}</p>
+              <p className={`text-xs mt-1 ${
+                msg.sender_id === user?.id ? 'text-indigo-200' : 'text-gray-500'
+              }`}>
+                {new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+              </p>
             </div>
-          )}
+          </div>
+        ))}
+        <div ref={messagesEndRef} />
+      </div>
+
+      {/* Message Input */}
+      <div className="bg-white border-t">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+          <form onSubmit={handleSubmit} className="flex items-center space-x-4">
+            <input
+              type="text"
+              value={newMessage}
+              onChange={(e) => setNewMessage(e.target.value)}
+              placeholder="Type your message..."
+              className="flex-1 rounded-full px-6 py-3 bg-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white"
+            />
+            <button
+              type="submit"
+              className="rounded-full p-3 bg-indigo-600 text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+            >
+              <Send className="h-5 w-5" />
+            </button>
+          </form>
         </div>
       </div>
     </div>
