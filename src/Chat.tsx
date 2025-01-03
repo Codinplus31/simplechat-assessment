@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import axios from 'axios';
 import io from 'socket.io-client';
@@ -16,7 +16,7 @@ function Chat() {
   const [isUserOnline, setIsUserOnline] = useState(false);
   const [isTyping, setIsTyping] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const typingTimeoutRef = useRef<NodeJS.Timeout>();
+  const typingTimeoutRef = useRef<number>();
   const navigate = useNavigate();
   const { userId } = useParams();
 
@@ -100,11 +100,11 @@ function Chat() {
 
       // Clear existing timeout
       if (typingTimeoutRef.current) {
-        clearTimeout(typingTimeoutRef.current);
+        window.clearTimeout(typingTimeoutRef.current);
       }
 
       // Set new timeout
-      typingTimeoutRef.current = setTimeout(() => {
+      typingTimeoutRef.current = window.setTimeout(() => {
         socket.emit('stop_typing', {
           userId: user.id,
           recipientId: selectedUser.id
@@ -125,7 +125,7 @@ function Chat() {
       
       // Clear typing timeout
       if (typingTimeoutRef.current) {
-        clearTimeout(typingTimeoutRef.current);
+        window.clearTimeout(typingTimeoutRef.current);
       }
     }
   };
