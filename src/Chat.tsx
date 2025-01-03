@@ -58,6 +58,8 @@ function Chat() {
     // Listen for typing status
     socket.on('typing_status', ({ userId: typingUserId, isTyping: userIsTyping }) => {
       console.log(`Typing status: ${typingUserId} - ${userIsTyping}`);
+    alert(`${typingUserId}: ${typeof typingUserId} ${userId}:${typeof userId}`)
+  
       if (typingUserId === Number(userId)) {
         setIsTyping(userIsTyping);
       }
