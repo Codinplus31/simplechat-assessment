@@ -48,11 +48,16 @@ function Chat() {
     // Listen for user status changes
     socket.on('user_status_change', (onlineUsers) => {
 //  let    {userId: statusUserId
-          let filt = onlineUsers.filter(e=>{
+        /*  let filt = onlineUsers.filter(e=>{
     if(e.userId === userId){
     return e
     }
-  }).map(e=> e);
+  }).map(e=> e);*/
+      let filt = onlineUsers.filter((e: { userId: string }) => {
+if (e.userId === userId) {
+return e;
+}
+}).map((e: { userId: string }) => e);
     //  console.log(`User status change: ${statusUserId} - ${status}`);
    //  alert(`${statusUserId}: ${typeof statusUserId} ${userId}:${typeof userId}  ${status}`)
     alert(JSON.stringify(filt))
