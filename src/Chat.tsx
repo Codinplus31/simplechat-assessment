@@ -188,8 +188,7 @@ function Chat() {
 
   const getUserStatus = () => {
     if (isTyping) return 'typing...';
-    alert(`${isTyping} ${isUserOnline} 2`)
-    if (isUserOnline) return 'online';
+ if (isUserOnline) return 'online';
     return 'offline';
   };
 
