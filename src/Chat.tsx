@@ -2,7 +2,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import axios from 'axios';
 import io from 'socket.io-client';
-import { Message, User } from '../types';
+import { Message, User } from './types';
 import { ArrowLeft, Send } from 'lucide-react';
 
 const API_URL = 'https://simplechat-backend-f4w5.onrender.com';
