@@ -95,7 +95,7 @@ return e;
       console.log('Disconnecting socket...');
       socket.off('connect');
       socket.off('user_status_change');
-   //   socket.off('typing_status');
+      socket.off('typing_status');
       socket.off('message');
       socket.disconnect();
     }; 
