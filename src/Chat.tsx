@@ -6,6 +6,7 @@ import { Message, User } from './types';
 import { ArrowLeft, Send } from 'lucide-react';
 import Preloader from './Preloader';
 
+
 const API_URL = 'https://simplechat-backend-f4w5.onrender.com';
 const socket = io(API_URL);
 
