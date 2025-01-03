@@ -6,7 +6,6 @@ import { Message, User } from './types';
 import { ArrowLeft, Send } from 'lucide-react';
 import Preloader from './Preloader';
 
-
 const API_URL = 'https://simplechat-backend-f4w5.onrender.com';
 const socket = io(API_URL);
 
@@ -37,33 +36,24 @@ function Chat() {
     fetchSelectedUser(token, userId);
 
     // Connect to socket
-    socket.connect();
-    console.log('Connecting to socket...');
-
-    socket.on('connect', () => {
-      console.log('Socket connected');
-      socket.emit('user_connected', parsedUser.id);
-    });
+    socket.emit('user_connected', parsedUser.id);
 
     // Listen for user status changes
     socket.on('user_status_change', ({ userId: statusUserId, status }) => {
       console.log(`User status change: ${statusUserId} - ${status}`);
       if (statusUserId === Number(userId)) {
-       alert("1")
         setIsUserOnline(status === 'online');
       }
     });
 
     // Listen for typing status
     socket.on('typing_status', ({ userId: typingUserId, isTyping: userIsTyping }) => {
-      console.log(`Typing status: ${typingUserId} - ${userIsTyping}`);
       if (typingUserId === Number(userId)) {
         setIsTyping(userIsTyping);
       }
     });
 
     socket.on('message', (message: Message) => {
-      console.log('Received message:', message);
       if (
         (message.sender_id === parsedUser.id && message.recipient_id === Number(userId)) ||
         (message.sender_id === Number(userId) && message.recipient_id === parsedUser.id)
@@ -72,15 +62,12 @@ function Chat() {
         setIsTyping(false);
       }
     });
-/*
+
     return () => {
-      console.log('Disconnecting socket...');
-      socket.off('connect');
       socket.off('user_status_change');
       socket.off('typing_status');
       socket.off('message');
-      socket.disconnect();
-    }; */
+    };
   }, [navigate, userId]);
 
   const fetchSelectedUser = async (token: string, userId: string) => {
@@ -111,7 +98,6 @@ function Chat() {
 
   const handleTyping = useCallback(() => {
     if (user && selectedUser) {
-      console.log('Emitting start_typing event');
       socket.emit('start_typing', {
         userId: user.id,
         recipientId: selectedUser.id
@@ -124,7 +110,6 @@ function Chat() {
 
       // Set new timeout
       typingTimeoutRef.current = window.setTimeout(() => {
-        console.log('Emitting stop_typing event');
         socket.emit('stop_typing', {
           userId: user.id,
           recipientId: selectedUser.id
@@ -136,7 +121,6 @@ function Chat() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (newMessage.trim() && user && selectedUser) {
-      console.log('Sending message:', newMessage);
       socket.emit('sendMessage', {
         senderId: user.id,
         recipientId: selectedUser.id,
@@ -148,7 +132,6 @@ function Chat() {
       if (typingTimeoutRef.current) {
         window.clearTimeout(typingTimeoutRef.current);
       }
-      console.log('Emitting stop_typing event after sending message');
       socket.emit('stop_typing', {
         userId: user.id,
         recipientId: selectedUser.id
@@ -188,7 +171,6 @@ function Chat() {
 
   const getUserStatus = () => {
     if (isTyping) return 'typing...';
-    alert(`${isTyping} ${isUserOnline} 2`)
     if (isUserOnline) return 'online';
     return 'offline';
   };
