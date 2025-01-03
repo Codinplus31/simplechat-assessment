@@ -134,7 +134,7 @@ return e;
         recipientId: selectedUser.id
       });
 setIsTyping(true)
-      alert(`first ${user.id} sec ${selectedUser}`)
+      alert(`first ${user.id} sec ${selectedUser.id}`)
       // Clear existing timeout
       if (typingTimeoutRef.current) {
         window.clearTimeout(typingTimeoutRef.current);
