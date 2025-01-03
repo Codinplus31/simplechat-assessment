@@ -16,7 +16,7 @@ function Register() {
       const { token, user } = response.data;
       localStorage.setItem('token', token);
       localStorage.setItem('user', JSON.stringify(user));
-      navigate('/chat');
+      navigate('/users');
     } catch (error) {
       console.error('Registration error:', error);
       alert('Registration failed. Please try again.');
