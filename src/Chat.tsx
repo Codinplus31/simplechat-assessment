@@ -2,11 +2,19 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import axios from 'axios';
 import io from 'socket.io-client';
-import { Message, User } from './types';
+import { Message, User } from '../types';
 import { ArrowLeft, Send } from 'lucide-react';
 
 const API_URL = 'https://simplechat-backend-f4w5.onrender.com';
 const socket = io(API_URL);
+
+const Preloader: React.FC = () => {
+  return (
+    <div className="flex justify-center items-center h-screen bg-gray-100">
+      <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-indigo-500"></div>
+    </div>
+  );
+};
 
 function Chat() {
   const [messages, setMessages] = useState<Message[]>([]);
@@ -15,6 +23,7 @@ function Chat() {
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [isUserOnline, setIsUserOnline] = useState(false);
   const [isTyping, setIsTyping] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const typingTimeoutRef = useRef<number>();
   const navigate = useNavigate();
@@ -86,8 +95,10 @@ function Chat() {
         params: { recipient_id: recipientId },
       });
       setMessages(response.data);
+      setIsLoading(false);
     } catch (error) {
       console.error('Error fetching messages:', error);
+      setIsLoading(false);
     }
   };
 
@@ -153,6 +164,10 @@ function Chat() {
   };
 
   useEffect(scrollToBottom, [messages]);
+
+  if (isLoading) {
+    return <Preloader />;
+  }
 
   if (!selectedUser) return null;
 
