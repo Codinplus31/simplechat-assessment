@@ -7,7 +7,7 @@ function Home() {
   useEffect(() => {
     const token = localStorage.getItem('token');
     if (token) {
-      navigate('/chat');
+      navigate('/users');
     } else {
       navigate('/login');
     }
