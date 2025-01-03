@@ -1,8 +1,8 @@
-import  { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import axios from 'axios';
 import io from 'socket.io-client';
-import { Message, User } from './types';
+import { Message, User } from '../types';
 import { ArrowLeft, Send } from 'lucide-react';
 
 const API_URL = 'https://simplechat-backend-f4w5.onrender.com';
@@ -13,7 +13,10 @@ function Chat() {
   const [newMessage, setNewMessage] = useState('');
   const [user, setUser] = useState<User | null>(null);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
+  const [isUserOnline, setIsUserOnline] = useState(false);
+  const [isTyping, setIsTyping] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const typingTimeoutRef = useRef<NodeJS.Timeout>();
   const navigate = useNavigate();
   const { userId } = useParams();
 
@@ -29,7 +32,23 @@ function Chat() {
     const parsedUser = JSON.parse(storedUser);
     setUser(parsedUser);
     fetchSelectedUser(token, userId);
-    socket.emit('join', parsedUser.id);
+
+    // Connect to socket
+    socket.emit('user_connected', parsedUser.id);
+
+    // Listen for user status changes
+    socket.on('user_status', ({ userId: statusUserId, status }) => {
+      if (statusUserId === Number(userId)) {
+        setIsUserOnline(status === 'online');
+      }
+    });
+
+    // Listen for typing status
+    socket.on('typing_status', ({ userId: typingUserId, isTyping }) => {
+      if (typingUserId === Number(userId)) {
+        setIsTyping(isTyping);
+      }
+    });
 
     socket.on('message', (message: Message) => {
       if (
@@ -37,10 +56,13 @@ function Chat() {
         (message.sender_id === Number(userId) && message.recipient_id === parsedUser.id)
       ) {
         setMessages((prevMessages) => [...prevMessages, message]);
+        setIsTyping(false);
       }
     });
 
     return () => {
+      socket.off('user_status');
+      socket.off('typing_status');
       socket.off('message');
     };
   }, [navigate, userId]);
@@ -69,6 +91,28 @@ function Chat() {
     }
   };
 
+  const handleTyping = useCallback(() => {
+    if (user && selectedUser) {
+      socket.emit('start_typing', {
+        userId: user.id,
+        recipientId: selectedUser.id
+      });
+
+      // Clear existing timeout
+      if (typingTimeoutRef.current) {
+        clearTimeout(typingTimeoutRef.current);
+      }
+
+      // Set new timeout
+      typingTimeoutRef.current = setTimeout(() => {
+        socket.emit('stop_typing', {
+          userId: user.id,
+          recipientId: selectedUser.id
+        });
+      }, 1000);
+    }
+  }, [user, selectedUser]);
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (newMessage.trim() && user && selectedUser) {
@@ -78,6 +122,11 @@ function Chat() {
         content: newMessage,
       });
       setNewMessage('');
+      
+      // Clear typing timeout
+      if (typingTimeoutRef.current) {
+        clearTimeout(typingTimeoutRef.current);
+      }
     }
   };
 
@@ -119,12 +168,17 @@ function Chat() {
             >
               <ArrowLeft className="h-6 w-6" />
             </button>
-            <div className={`w-12 h-12 rounded-full ${getRandomColor(selectedUser.username)} flex items-center justify-center text-white text-xl font-semibold`}>
-              {getInitial(selectedUser.username)}
+            <div className={`w-12 h-12 rounded-full ${getRandomColor(selectedUser?.username || '')} flex items-center justify-center text-white text-xl font-semibold relative`}>
+              {selectedUser && getInitial(selectedUser.username)}
+              {isUserOnline && (
+                <span className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full ring-2 ring-white" />
+              )}
             </div>
             <div>
-              <h2 className="text-2xl font-semibold text-gray-900">{selectedUser.username}</h2>
-              <p className="text-sm text-gray-500">Online</p>
+              <h2 className="text-2xl font-semibold text-gray-900">{selectedUser?.username}</h2>
+              <p className="text-sm text-gray-500">
+                {isTyping ? 'typing...' : isUserOnline ? 'online' : 'offline'}
+              </p>
             </div>
           </div>
         </div>
@@ -163,7 +217,10 @@ function Chat() {
             <input
               type="text"
               value={newMessage}
-              onChange={(e) => setNewMessage(e.target.value)}
+              onChange={(e) => {
+                setNewMessage(e.target.value);
+                handleTyping();
+              }}
               placeholder="Type your message..."
               className="flex-1 rounded-full px-6 py-3 bg-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white"
             />
