@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import axios from 'axios';
 import io from 'socket.io-client';
 import { Message, User } from './types';
@@ -22,7 +22,7 @@ function Chat() {
   const typingTimeoutRef = useRef<number>();
   const navigate = useNavigate();
   const { userId } = useParams();
-
+const location = useLocation();
   useEffect(() => {
     const token = localStorage.getItem('token');
     const storedUser = localStorage.getItem('user');
@@ -99,7 +99,7 @@ return e;
       socket.off('message');
       socket.disconnect();
     }; 
-  }, [navigate, userId]);
+  }, [location.pathname, navigate, userId]);
 
   const fetchSelectedUser = async (token: string, userId: string) => {
     try {
