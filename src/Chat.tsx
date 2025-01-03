@@ -41,7 +41,7 @@ function Chat() {
     // Listen for user status changes
     socket.on('user_status_change', ({ userId: statusUserId, status }) => {
       console.log(`User status change: ${statusUserId} - ${status}`);
-      if (statusUserId === Number(userId)) {
+      if (statusUserId === userId) {
         setIsUserOnline(status === 'online');
       }
     });
