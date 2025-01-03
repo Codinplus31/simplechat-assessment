@@ -6,7 +6,6 @@ import { Message, User } from './types';
 import { ArrowLeft, Send } from 'lucide-react';
 import Preloader from './Preloader';
 
-
 const API_URL = 'https://simplechat-backend-f4w5.onrender.com';
 const socket = io(API_URL);
 
@@ -72,6 +71,13 @@ function Chat() {
       }
     });
 
+    // Set interval to check user status and typing status every 2 seconds
+    const intervalId = setInterval(() => {
+      if (parsedUser && userId) {
+        socket.emit('check_status', { userId: parsedUser.id, recipientId: Number(userId) });
+      }
+    }, 2000);
+
     return () => {
       console.log('Disconnecting socket...');
       socket.off('connect');
@@ -79,6 +85,7 @@ function Chat() {
       socket.off('typing_status');
       socket.off('message');
       socket.disconnect();
+      clearInterval(intervalId);
     };
   }, [navigate, userId]);
 
@@ -142,7 +149,7 @@ function Chat() {
         content: newMessage,
       });
       setNewMessage('');
-      
+
       // Clear typing timeout
       if (typingTimeoutRef.current) {
         window.clearTimeout(typingTimeoutRef.current);
@@ -273,4 +280,3 @@ function Chat() {
 }
 
 export default Chat;
-
