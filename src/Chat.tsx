@@ -72,7 +72,7 @@ function Chat() {
         setIsTyping(false);
       }
     });
-
+/*
     return () => {
       console.log('Disconnecting socket...');
       socket.off('connect');
@@ -80,7 +80,7 @@ function Chat() {
       socket.off('typing_status');
       socket.off('message');
       socket.disconnect();
-    };
+    }; */
   }, [navigate, userId]);
 
   const fetchSelectedUser = async (token: string, userId: string) => {
