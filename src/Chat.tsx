@@ -2,19 +2,12 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import axios from 'axios';
 import io from 'socket.io-client';
-import { Message, User } from './types';
+import { Message, User } from '../types';
 import { ArrowLeft, Send } from 'lucide-react';
+import Preloader from './Preloader';
 
 const API_URL = 'https://simplechat-backend-f4w5.onrender.com';
 const socket = io(API_URL);
-
-const Preloader: React.FC = () => {
-  return (
-    <div className="flex justify-center items-center h-screen bg-gray-100">
-      <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-indigo-500"></div>
-    </div>
-  );
-};
 
 function Chat() {
   const [messages, setMessages] = useState<Message[]>([]);
@@ -53,9 +46,9 @@ function Chat() {
     });
 
     // Listen for typing status
-    socket.on('typing_status', ({ userId: typingUserId, isTyping }) => {
+    socket.on('typing_status', ({ userId: typingUserId, isTyping: userIsTyping }) => {
       if (typingUserId === Number(userId)) {
-        setIsTyping(isTyping);
+        setIsTyping(userIsTyping);
       }
     });
 
@@ -138,6 +131,10 @@ function Chat() {
       if (typingTimeoutRef.current) {
         window.clearTimeout(typingTimeoutRef.current);
       }
+      socket.emit('stop_typing', {
+        userId: user.id,
+        recipientId: selectedUser.id
+      });
     }
   };
 
@@ -171,6 +168,12 @@ function Chat() {
 
   if (!selectedUser) return null;
 
+  const getUserStatus = () => {
+    if (isTyping) return 'typing...';
+    if (isUserOnline) return 'online';
+    return 'offline';
+  };
+
   return (
     <div className="flex flex-col h-screen bg-gray-50">
       {/* Header */}
@@ -192,7 +195,7 @@ function Chat() {
             <div>
               <h2 className="text-2xl font-semibold text-gray-900">{selectedUser?.username}</h2>
               <p className="text-sm text-gray-500">
-                {isTyping ? 'typing...' : isUserOnline ? 'online' : 'offline'}
+                {getUserStatus()}
               </p>
             </div>
           </div>
