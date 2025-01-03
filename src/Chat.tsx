@@ -53,8 +53,8 @@ function Chat() {
     return e
     }
   }).map(e=> e);
-      console.log(`User status change: ${statusUserId} - ${status}`);
-     alert(`${statusUserId}: ${typeof statusUserId} ${userId}:${typeof userId}  ${status}`)
+    //  console.log(`User status change: ${statusUserId} - ${status}`);
+   //  alert(`${statusUserId}: ${typeof statusUserId} ${userId}:${typeof userId}  ${status}`)
     alert(JSON.stringify(filt))
       if (filt.length > 0) {
        
