@@ -55,9 +55,11 @@ function Chat() {
   }).map(e=> e);*/
       let filt = onlineUsers.filter((e: { userId: number}) => {
 if (e.userId === userId) {
+  alert(JSON.stringify(e))
 return e;
 }
-}).map((e: { userId: number }) => e);
+})
+        //.map((e: { userId: number }) => e);
     //  console.log(`User status change: ${statusUserId} - ${status}`);
    //  alert(`${statusUserId}: ${typeof statusUserId} ${userId}:${typeof userId}  ${status}`)
     alert(JSON.stringify(filt))
