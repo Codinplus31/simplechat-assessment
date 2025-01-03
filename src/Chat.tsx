@@ -99,8 +99,8 @@ return e;
       socket.off('message');
       socket.disconnect();
     }; 
-  }, [location.pathname, navigate, userId]);
-
+//  }, [location.pathname, navigate, userId]);
+ }, [location.pathname, navigate, userId]);
   const fetchSelectedUser = async (token: string, userId: string) => {
     try {
       const response = await axios.get<User>(`${API_URL}/users/${userId}`, {
