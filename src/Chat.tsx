@@ -67,6 +67,7 @@ return e;
        
         setIsUserOnline(filt[0].status === 'online');
       }
+      alert(userId)
     });
 
     // Listen for typing status
