@@ -70,14 +70,14 @@ return e;
     });
 
     // Listen for typing status
-    socket.on('typing_status', ({ userId: typingUserId, isTyping: userIsTyping }) => {
+  /*  socket.on('typing_status', ({ userId: typingUserId, isTyping: userIsTyping }) => {
       console.log(`Typing status: ${typingUserId} - ${userIsTyping}`);
     alert(`${typingUserId}: ${typeof typingUserId} ${userId}:${typeof userId}`)
   
       if (typingUserId === Number(userId)) {
         setIsTyping(userIsTyping);
       }
-    });
+    });*/
 
     socket.on('message', (message: Message) => {
       console.log('Received message:', message);
@@ -94,7 +94,7 @@ return e;
       console.log('Disconnecting socket...');
       socket.off('connect');
       socket.off('user_status_change');
-      socket.off('typing_status');
+   //   socket.off('typing_status');
       socket.off('message');
       socket.disconnect();
     }; 
@@ -133,7 +133,7 @@ return e;
         userId: user.id,
         recipientId: selectedUser.id
       });
-
+setIsTyping(true)
       // Clear existing timeout
       if (typingTimeoutRef.current) {
         window.clearTimeout(typingTimeoutRef.current);
@@ -146,6 +146,7 @@ return e;
           userId: user.id,
           recipientId: selectedUser.id
         });
+        setIsTyping(false)
       }, 1000);
     }
   }, [user, selectedUser]);
