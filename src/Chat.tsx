@@ -55,14 +55,14 @@ function Chat() {
   }).map(e=> e);*/
       let filt = onlineUsers.filter((e: { userId: number}) => {
 if (e.userId === Number(userId)) {
-  alert(JSON.stringify(e))
+//  alert(JSON.stringify(e))
 return e;
 }
 })
         //.map((e: { userId: number }) => e);
     //  console.log(`User status change: ${statusUserId} - ${status}`);
    //  alert(`${statusUserId}: ${typeof statusUserId} ${userId}:${typeof userId}  ${status}`)
-    alert(JSON.stringify(filt))
+   // alert(JSON.stringify(filt))
       if (filt.length > 0) {
        
         setIsUserOnline(filt[0].status === 'online');
