@@ -22,7 +22,7 @@ function Chat() {
   const typingTimeoutRef = useRef<number>();
   const navigate = useNavigate();
   const { userId } = useParams();
-const location = useLocation();
+//const location = useLocation();
   useEffect(() => {
     const token = localStorage.getItem('token');
     const storedUser = localStorage.getItem('user');
