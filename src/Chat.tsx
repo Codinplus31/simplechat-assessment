@@ -67,13 +67,13 @@ return e;
        
         setIsUserOnline(filt[0].status === 'online');
       }
-      alert(userId)
+    //  alert(userId)
     });
 
     // Listen for typing status
     socket.on('typing_status', ({ userId: typingUserId, isTyping: userIsTyping }) => {
       console.log(`Typing status: ${typingUserId} - ${userIsTyping}`);
-    alert(`${typingUserId}: ${typeof typingUserId} ${userId}:${typeof userId}`)
+ //   alert(`${typingUserId}: ${typeof typingUserId} ${userId}:${typeof userId}`)
   
       if (typingUserId === Number(userId)) {
         setIsTyping(userIsTyping);
