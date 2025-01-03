@@ -134,7 +134,7 @@ return e;
         userId: user.id,
         recipientId: selectedUser.id
       });
-setIsTyping(true)
+//setIsTyping(true)
       alert(`first ${user.id} sec ${selectedUser.id}`)
       // Clear existing timeout
       if (typingTimeoutRef.current) {
@@ -148,7 +148,7 @@ setIsTyping(true)
           userId: user.id,
           recipientId: selectedUser.id
         });
-        setIsTyping(false)
+     //   setIsTyping(false)
       }, 1000);
     }
   }, [user, selectedUser]);
